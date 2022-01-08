@@ -11,7 +11,7 @@ window.addEventListener("mousedown", () => isMouseDown = true)
 window.addEventListener("mouseup", () => isMouseDown = false)
 
 const state = {
-    outerRadius: 12,
+    outerRadius: 6,
     ratioOfRadii: 3,
     birth1: 0.278,
     birth2: 0.365,
@@ -138,15 +138,69 @@ const drawToCanvas = regl({
     count: 6,
 });
 
+
+const drawBrushStroke = regl({
+    vert: `
+        precision highp float;
+        attribute vec2 position;
+        varying vec2 uv;
+        void main() {
+            uv = position;
+            gl_Position = vec4(position, 0, 1);
+        }
+    `,
+    frag: `
+        precision highp float;
+        uniform sampler2D readTexture;
+        uniform vec3 mouse;
+        uniform float brushRadius;
+        varying vec2 uv;
+
+        float rand(vec2 co){
+            return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+        }
+
+        void main () {
+          vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
+          if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius && rand(gl_FragCoord.xy) > 0.5){
+            color = vec4(1);
+          }
+          gl_FragColor = color;
+        }
+    `,
+    uniforms: {
+        readTexture: regl.prop('readTexture'),
+        mouse: () => [
+            mouseX,
+            window.innerHeight - mouseY,
+            isMouseDown ? 1 : 0,
+        ],
+        brushRadius: 10,
+    },
+    attributes: {
+        position: [
+            [-1, 1], [1, 1], [1, -1],
+            [1, -1], [-1, -1], [-1, 1],
+        ]
+    },
+    count: 6,
+})
+
 const getFBOs = createPingPongBuffers();
 regl.frame(() => {
     const [read, write] = getFBOs();
     write.use(() => {
-        drawLife({
+        drawBrushStroke({
             readTexture: read,
-        })
-    })
+        });
+    });
+    const [read2, write2] = getFBOs();
+    write2.use(() => {
+        drawLife({
+            readTexture: read2,
+        });
+    });
     drawToCanvas({
-        readTexture: write
-    })
+        readTexture: write2
+    });
 })

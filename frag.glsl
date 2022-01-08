@@ -91,9 +91,9 @@ void main()
     inf /= AREA_INNER; // normalize by area
     
     float c = s(outf,inf); // discrete time step
-    if(currentFrame < 10) { //  || mouse.z > 0.
-        //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
-        c = hash13(vec3(gl_FragCoord.xy, currentFrame)) * 0.75;
-    }
+    // if(currentFrame < 10) { //  || mouse.z > 0.
+    //     //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
+    //     c = hash13(vec3(gl_FragCoord.xy, currentFrame)) * 0.75;
+    // }
     gl_FragColor = vec4(c,c,c,1);
 }
