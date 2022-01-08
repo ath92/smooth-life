@@ -11,14 +11,16 @@ window.addEventListener("mousedown", () => isMouseDown = true)
 window.addEventListener("mouseup", () => isMouseDown = false)
 
 const state = {
-    outerRadius: 6,
+    outerRadius: 9,
     ratioOfRadii: 3,
-    birth1: 0.278,
+    birth1: 0.268,
     birth2: 0.365,
     survival1: 0.267,
     survival2: 0.445,
-    fullness1: 0.028,
+    fullness1: 0.038,
     fullness2: 0.147,
+
+    brushRadius: 10,
 }
 
 function initStateBindings() {
@@ -27,14 +29,9 @@ function initStateBindings() {
         if (!boundEl) return;
 
         boundEl.value = value;
-    })
-
-    window.addEventListener("change", (e) => {
-        const boundVar = e.target.getAttribute?.("data-state");
-        if (!boundVar) return;
-        console.log("updating", boundVar, e.target.value);
-        // Always cast to float for now, assuming all state for this app are numbers anyway.
-        state[boundVar] = parseFloat(e.target.value);
+        boundEl.addEventListener("change", (e) => {
+            state[key] = parseFloat(e.target.value);
+        })
     })
 };
 
@@ -175,7 +172,7 @@ const drawBrushStroke = regl({
             window.innerHeight - mouseY,
             isMouseDown ? 1 : 0,
         ],
-        brushRadius: 10,
+        brushRadius: () => state.brushRadius,
     },
     attributes: {
         position: [
@@ -188,19 +185,22 @@ const drawBrushStroke = regl({
 
 const getFBOs = createPingPongBuffers();
 regl.frame(() => {
+    if (isMouseDown) {
+        const [read, write] = getFBOs();
+        write.use(() => {
+            drawBrushStroke({
+                readTexture: read,
+            });
+        });
+    }
+
     const [read, write] = getFBOs();
     write.use(() => {
-        drawBrushStroke({
+        drawLife({
             readTexture: read,
         });
     });
-    const [read2, write2] = getFBOs();
-    write2.use(() => {
-        drawLife({
-            readTexture: read2,
-        });
-    });
     drawToCanvas({
-        readTexture: write2
+        readTexture: write
     });
 })

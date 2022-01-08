@@ -19,6 +19,7 @@
                 top: 0;
                 background-color: #333;
                 border-radius: 0 0 .25rem .25rem;
+                padding-top: .5rem;
                 z-index: 2;
             }
 
@@ -37,10 +38,17 @@
             .controls label input {
                 flex: 1;
             }
+
+            .controls h2 {
+                color: #fff;
+                font-size: 1rem;
+                margin: .5rem;
+            }
         </style>
     </head>
     <body>
         <section class="controls">
+            <h2>Life settings</h2>
             <label>
                 <span>Outer radius</span>
                 <input data-state="outerRadius" type="range" min="1" max="24" step="0.01" />
@@ -73,12 +81,19 @@
 
             <label>
                 <span>Fullness 1</span>
-                <input data-state="fullness1" type="range" min="0.01" max="0.1" step="0.001" />
+                <input data-state="fullness1" type="range" min="0.01" max="0.2" step="0.001" />
             </label>
 
             <label>
                 <span>Fullness 2</span>
                 <input data-state="fullness2" type="range" min="0.01" max="0.5" step="0.001" />
+            </label>
+
+            <h2>Brush settings</h2>
+
+            <label>
+                <span>Radius</span>
+                <input data-state="brushRadius" type="range" min="1" max="50" step="0.01" />
             </label>
         </section>
         <script src="main.js" type="module"></script>
