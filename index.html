@@ -8,10 +8,79 @@
                 width: 100%;
                 height: 100%;
                 background: #000;
+                font-size: 16px;
+                font-family: sans-serif;
+            }
+
+            .controls {
+                position: fixed;
+                width: 20rem;
+                right: 1rem;
+                top: 0;
+                background-color: #333;
+                border-radius: 0 0 .25rem .25rem;
+                z-index: 2;
+            }
+
+            .controls label {
+                display: flex;
+                padding: .5rem;
+                align-items: center;
+            }
+
+            .controls label span {
+                color: #fff;
+                font-size: .75rem;
+                flex-basis: 8rem;
+            }
+
+            .controls label input {
+                flex: 1;
             }
         </style>
     </head>
     <body>
+        <section class="controls">
+            <label>
+                <span>Outer radius</span>
+                <input data-state="outerRadius" type="range" min="1" max="24" step="0.01" />
+            </label>
+
+            <label>
+                <span>Ratio of radii</span>
+                <input data-state="ratioOfRadii" type="range" min="1" max="6" step="0.01" />
+            </label>
+
+            <label>
+                <span>Birthrate 1</span>
+                <input data-state="birth1" type="range" min="0.1" max="0.5" step="0.001" />
+            </label>
+
+            <label>
+                <span>Birthrate 2</span>
+                <input data-state="birth2" type="range" min="0.1" max="0.5" step="0.001" />
+            </label>
+
+            <label>
+                <span>Survival rate 1</span>
+                <input data-state="survival1" type="range" min="0.1" max="0.5" step="0.001" />
+            </label>
+
+            <label>
+                <span>Survival rate 2</span>
+                <input data-state="survival2" type="range" min="0.1" max="0.5" step="0.001" />
+            </label>
+
+            <label>
+                <span>Fullness 1</span>
+                <input data-state="fullness1" type="range" min="0.01" max="0.1" step="0.001" />
+            </label>
+
+            <label>
+                <span>Fullness 2</span>
+                <input data-state="fullness2" type="range" min="0.01" max="0.5" step="0.001" />
+            </label>
+        </section>
         <script src="main.js" type="module"></script>
     </body>
 </html>

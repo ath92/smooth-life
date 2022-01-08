@@ -10,14 +10,14 @@ uniform vec3 mouse;
 // based on <https://git.io/vz29Q>
 // ---------------------------------------------
 // smoothglider (discrete time stepping 2D)
-const float ra = 12.0;         // outer radius
-const float rr = 3.0;          // ratio of radii
-const float b1 = 0.278;        // birth1
-const float b2 = 0.365;        // birth2
-const float s1 = 0.267;        // survival1
-const float s2 = 0.445;        // survival2
-const float alpha_n = 0.028;   // sigmoid width for outer fullness
-const float alpha_m = 0.147;   // sigmoid width for inner fullness
+uniform float ra;         // outer radius
+uniform float rr;          // ratio of radii
+uniform float b1;        // birth1
+uniform float b2;        // birth2
+uniform float s1;        // survival1
+uniform float s2;        // survival2
+uniform float alpha_n;   // sigmoid width for outer fullness
+uniform float alpha_m;   // sigmoid width for inner fullness
 // ---------------------------------------------
 
 float sigma1(float x,float a,float alpha) 
@@ -58,33 +58,40 @@ float hash13(vec3 p3) {
     return fract((p3.x + p3.y)*p3.z);
 }
 
+
+
 void main()
 {
     vec2 uv = gl_FragCoord.xy / resolution.xy;
-    
+    const float maxRa = 24.;
     // inner radius:
-    const float rb = ra/rr;
+    float rb = ra/rr;
     // area of annulus:
     const float PI = 3.14159265358979;
-    const float AREA_OUTER = PI * (ra*ra - rb*rb);
-    const float AREA_INNER = PI * rb * rb;
+    float AREA_OUTER = PI * (ra*ra - rb*rb);
+    float AREA_INNER = PI * rb * rb;
     
     // how full are the annulus and inner disk?
     float outf = 0.0, inf = 0.0;
-    for(float dx=-ra; dx<=ra; dx++) for(float dy=-ra; dy<=ra; dy++)
-    {
-        float r = sqrt(float(dx*dx + dy*dy));
-        vec2 txy = mod((gl_FragCoord.xy + vec2(dx,dy)) / resolution.xy, 1.);
-        float val = texture2D(readTexture, txy).x; 
-        inf  += val * ramp_step(-r,-rb,1.0);
-        outf += val * ramp_step(-r,-ra,1.0) 
-                    * ramp_step(r,rb,1.0);
+    for(float _dx=0.; _dx<=2.*maxRa; _dx++) {
+        float dx = _dx - ra;
+        for(float _dy=0.; _dy<=2.*maxRa; _dy++) {
+            float dy = _dy - ra;
+            float r = sqrt(float(dx*dx + dy*dy));
+            vec2 txy = mod((gl_FragCoord.xy + vec2(dx,dy)) / resolution.xy, 1.);
+            float val = texture2D(readTexture, txy).x; 
+            inf  += val * ramp_step(-r,-rb,1.0);
+            outf += val * ramp_step(-r,-ra,1.0) 
+                        * ramp_step(r,rb,1.0);
+            if (dy > 2. * ra) break;
+        }
+        if (dx > 2. * ra) break;
     }
     outf /= AREA_OUTER; // normalize by area
     inf /= AREA_INNER; // normalize by area
     
     float c = s(outf,inf); // discrete time step
-    if(currentFrame < 10 || mouse.z > 0.) {
+    if(currentFrame < 10) { //  || mouse.z > 0.
         //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
         c = hash13(vec3(gl_FragCoord.xy, currentFrame)) * 0.75;
     }

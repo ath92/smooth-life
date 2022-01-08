@@ -10,12 +10,43 @@ let isMouseDown = false;
 window.addEventListener("mousedown", () => isMouseDown = true)
 window.addEventListener("mouseup", () => isMouseDown = false)
 
+const state = {
+    outerRadius: 12,
+    ratioOfRadii: 3,
+    birth1: 0.278,
+    birth2: 0.365,
+    survival1: 0.267,
+    survival2: 0.445,
+    fullness1: 0.028,
+    fullness2: 0.147,
+}
+
+function initStateBindings() {
+    Object.entries(state).forEach(([key, value]) => {
+        const boundEl = document.querySelector(`[data-state="${key}"]`);
+        if (!boundEl) return;
+
+        boundEl.value = value;
+    })
+
+    window.addEventListener("change", (e) => {
+        const boundVar = e.target.getAttribute?.("data-state");
+        if (!boundVar) return;
+        console.log("updating", boundVar, e.target.value);
+        // Always cast to float for now, assuming all state for this app are numbers anyway.
+        state[boundVar] = parseFloat(e.target.value);
+    })
+};
+
+initStateBindings();
+
 const regl = Regl()
 
 const textureOptions = {
     width: window.innerWidth,
     height: window.innerHeight,
 }
+
 const createPingPongBuffers = () => {
     const tex1 = regl.texture(textureOptions);
     const tex2 = regl.texture(textureOptions);
@@ -61,6 +92,14 @@ const drawLife = regl({
         ],
         readTexture: regl.prop("readTexture"),
 
+        ra: () => state.outerRadius,
+        rr: () => state.ratioOfRadii,
+        b1: () => state.birth1,
+        b2: () => state.birth2,
+        s1: () => state.survival1,
+        s2: () => state.survival2,
+        alpha_n: () => state.fullness1,
+        alpha_m: () => state.fullness2,
     },
   
     count: 6
