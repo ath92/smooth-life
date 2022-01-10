@@ -23,6 +23,7 @@ const state = {
 
     brushRadius: 10,
     randomSeed: 0,
+    kill: 0,
 }
 
 function initStateBindings() {
@@ -39,6 +40,10 @@ function initStateBindings() {
     const randomSeedBtn = document.querySelector("#randomSeed");
     randomSeedBtn.addEventListener("mousedown", () => state.randomSeed = 1)
     randomSeedBtn.addEventListener("mouseup", () => state.randomSeed = 0)
+
+    const killBtn = document.querySelector("#kill");
+    killBtn.addEventListener("mousedown", () => state.kill = 1)
+    killBtn.addEventListener("mouseup", () => state.kill = 0)
 
 };
 
@@ -106,6 +111,7 @@ const drawLife = regl({
         alpha_n: () => state.fullness1,
         alpha_m: () => state.fullness2,
         randomSeed: () => state.randomSeed,
+        kill: () => state.kill,
     },
   
     count: 6

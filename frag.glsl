@@ -7,6 +7,7 @@ uniform vec2 resolution;
 uniform sampler2D readTexture;
 uniform vec3 mouse;
 uniform float randomSeed;
+uniform float kill;
 uniform float dt;
 
 // based on <https://git.io/vz29Q>
@@ -96,6 +97,9 @@ void main()
     if(randomSeed > 0.5 || currentFrame <= 1.) { //  || mouse.z > 0.
         //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
         c = hash13(vec3(gl_FragCoord.xy, currentFrame)) * 0.75;
+    }
+    if (kill > 0.5) {
+        c = 0.;
     }
     gl_FragColor = vec4(c,c,c,1);
 }
