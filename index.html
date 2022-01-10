@@ -39,6 +39,14 @@
                 flex: 1;
             }
 
+            .controls label button {
+                border: none;
+                background: #191919;
+                color: #fff;
+                border-radius: .25rem;
+                padding: .5rem;
+            }
+
             .controls h2 {
                 color: #fff;
                 font-size: 1rem;
@@ -49,6 +57,12 @@
     <body>
         <section class="controls">
             <h2>Life settings</h2>
+
+            <label>
+                <span>Delta time</span>
+                <input data-state="dt" type="range" min="0.1" max="1" step="0.001" />
+            </label>
+
             <label>
                 <span>Outer radius</span>
                 <input data-state="outerRadius" type="range" min="1" max="24" step="0.01" />
@@ -60,23 +74,23 @@
             </label>
 
             <label>
-                <span>Birthrate 1</span>
-                <input data-state="birth1" type="range" min="0.1" max="0.5" step="0.001" />
+                <span>Birth 1</span>
+                <input data-state="birth1" type="range" min="0.1" max="1.0" step="0.001" />
             </label>
 
             <label>
-                <span>Birthrate 2</span>
-                <input data-state="birth2" type="range" min="0.1" max="0.5" step="0.001" />
+                <span>Death 1</span>
+                <input data-state="survival1" type="range" min="0.1" max="1.0" step="0.001" />
             </label>
 
             <label>
-                <span>Survival rate 1</span>
-                <input data-state="survival1" type="range" min="0.1" max="0.5" step="0.001" />
+                <span>Birth 2</span>
+                <input data-state="birth2" type="range" min="0.1" max="1.0" step="0.001" />
             </label>
 
             <label>
-                <span>Survival rate 2</span>
-                <input data-state="survival2" type="range" min="0.1" max="0.5" step="0.001" />
+                <span>Death 2</span>
+                <input data-state="survival2" type="range" min="0.1" max="1.0" step="0.001" />
             </label>
 
             <label>
@@ -89,11 +103,16 @@
                 <input data-state="fullness2" type="range" min="0.01" max="0.5" step="0.001" />
             </label>
 
-            <h2>Brush settings</h2>
+            <h2>Initialization settings</h2>
 
             <label>
-                <span>Radius</span>
+                <span>Brush radius</span>
                 <input data-state="brushRadius" type="range" min="1" max="50" step="0.01" />
+            </label>
+            
+            <label>
+                <span>Random seed</span>
+                <button id="randomSeed">Generate!</button>
             </label>
         </section>
         <script src="main.js" type="module"></script>

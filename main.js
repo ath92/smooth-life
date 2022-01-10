@@ -11,16 +11,18 @@ window.addEventListener("mousedown", () => isMouseDown = true)
 window.addEventListener("mouseup", () => isMouseDown = false)
 
 const state = {
-    outerRadius: 9,
+    dt: 0.5,
+    outerRadius: 8,
     ratioOfRadii: 3,
-    birth1: 0.268,
-    birth2: 0.365,
-    survival1: 0.267,
-    survival2: 0.445,
-    fullness1: 0.038,
-    fullness2: 0.147,
+    birth1: 0.34,
+    birth2: 0.56,
+    survival1: 0.56,
+    survival2: 0.75,
+    fullness1: 0.07,
+    fullness2: 0.230,
 
     brushRadius: 10,
+    randomSeed: 0,
 }
 
 function initStateBindings() {
@@ -29,10 +31,15 @@ function initStateBindings() {
         if (!boundEl) return;
 
         boundEl.value = value;
-        boundEl.addEventListener("change", (e) => {
+        boundEl.addEventListener("input", (e) => {
             state[key] = parseFloat(e.target.value);
         })
     })
+
+    const randomSeedBtn = document.querySelector("#randomSeed");
+    randomSeedBtn.addEventListener("mousedown", () => state.randomSeed = 1)
+    randomSeedBtn.addEventListener("mouseup", () => state.randomSeed = 0)
+
 };
 
 initStateBindings();
@@ -89,6 +96,7 @@ const drawLife = regl({
         ],
         readTexture: regl.prop("readTexture"),
 
+        dt: () => state.dt,
         ra: () => state.outerRadius,
         rr: () => state.ratioOfRadii,
         b1: () => state.birth1,
@@ -97,6 +105,7 @@ const drawLife = regl({
         s2: () => state.survival2,
         alpha_n: () => state.fullness1,
         alpha_m: () => state.fullness2,
+        randomSeed: () => state.randomSeed,
     },
   
     count: 6
@@ -151,6 +160,7 @@ const drawBrushStroke = regl({
         uniform sampler2D readTexture;
         uniform vec3 mouse;
         uniform float brushRadius;
+        uniform float currentFrame;
         varying vec2 uv;
 
         float rand(vec2 co){
@@ -159,7 +169,7 @@ const drawBrushStroke = regl({
 
         void main () {
           vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
-          if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius && rand(gl_FragCoord.xy) > 0.5){
+          if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius && rand(gl_FragCoord.xy * currentFrame) > 0.5){
             color = vec4(1);
           }
           gl_FragColor = color;
@@ -173,6 +183,7 @@ const drawBrushStroke = regl({
             isMouseDown ? 1 : 0,
         ],
         brushRadius: () => state.brushRadius,
+        currentFrame: () => frame,
     },
     attributes: {
         position: [

@@ -2,10 +2,12 @@
 
 precision highp float;
 
-uniform int currentFrame;
+uniform float currentFrame;
 uniform vec2 resolution;
 uniform sampler2D readTexture;
 uniform vec3 mouse;
+uniform float randomSeed;
+uniform float dt;
 
 // based on <https://git.io/vz29Q>
 // ---------------------------------------------
@@ -58,8 +60,6 @@ float hash13(vec3 p3) {
     return fract((p3.x + p3.y)*p3.z);
 }
 
-
-
 void main()
 {
     vec2 uv = gl_FragCoord.xy / resolution.xy;
@@ -90,10 +90,12 @@ void main()
     outf /= AREA_OUTER; // normalize by area
     inf /= AREA_INNER; // normalize by area
     
-    float c = s(outf,inf); // discrete time step
-    // if(currentFrame < 10) { //  || mouse.z > 0.
-    //     //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
-    //     c = hash13(vec3(gl_FragCoord.xy, currentFrame)) * 0.75;
-    // }
+    float prev = texture2D(readTexture, gl_FragCoord.xy / resolution.xy).x;
+    // square dt to get a nicer UX out of the slider
+    float c = prev + dt*dt * (s(outf,inf) - prev);
+    if(randomSeed > 0.5 || currentFrame <= 1.) { //  || mouse.z > 0.
+        //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
+        c = hash13(vec3(gl_FragCoord.xy, currentFrame)) * 0.75;
+    }
     gl_FragColor = vec4(c,c,c,1);
 }
