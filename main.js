@@ -20,6 +20,9 @@ const state = {
     fullness2: 0.230,
 
     brushRadius: 15,
+    brushRed: 0.8,
+    brushGreen: 0.9,
+    brushBlue: 1,
     randomSeed: 0,
     kill: 0,
 }
@@ -167,6 +170,7 @@ const drawBrushStroke = regl({
         uniform vec3 mouse;
         uniform float brushRadius;
         uniform float currentFrame;
+        uniform vec3 brushColor;
         varying vec2 uv;
 
         float rand(vec2 co){
@@ -175,8 +179,8 @@ const drawBrushStroke = regl({
 
         void main () {
           vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
-          if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius && rand(gl_FragCoord.xy * currentFrame) > 0.5){
-            color = vec4(1);
+          if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius){
+            color = vec4(brushColor, 1);
           }
           gl_FragColor = color;
         }
@@ -188,8 +192,14 @@ const drawBrushStroke = regl({
             window.innerHeight - mouseY,
             isMouseDown ? 1 : 0,
         ],
-        brushRadius: () => state.brushRadius,
         currentFrame: () => frame,
+
+        brushRadius: () => state.brushRadius,
+        brushColor: () => [
+            state.brushRed,
+            state.brushGreen,
+            state.brushBlue,
+        ],
     },
     attributes: {
         position: [
