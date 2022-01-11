@@ -1,4 +1,6 @@
-// shader copied from https://www.shadertoy.com/view/Msy3RD
+// Original shader copied from https://www.shadertoy.com/view/Msy3RD
+// Added smooth time stepping, adapted it for parameter control through uniforms,
+// and support for RGB (i.e. modelling adversarial relations between the color channels)
 
 precision lowp float;
 
@@ -79,8 +81,9 @@ vec3 getBiasedVal(vec3 val, vec3 redBias, vec3 greenBias, vec3 blueBias) {
 void main()
 {
     vec3 redBias = sum1(vec3(0.5, 0.0, -0.2));
-    vec3 greenBias = sum1(vec3(0.0, 0.5, -0.2));
-    vec3 blueBias = sum1(vec3(-1.2, 0.3, 1.5));
+
+    vec3 greenBias = sum1(vec3(0.5, 0.5, 0.2));
+    vec3 blueBias = sum1(vec3(-0.6, 0.28, 1.));
 
     vec2 uv = gl_FragCoord.xy / resolution.xy;
     const float maxRa = 24.;
