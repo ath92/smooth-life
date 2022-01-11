@@ -19,7 +19,7 @@ const state = {
     fullness1: 0.07,
     fullness2: 0.230,
 
-    brushRadius: 10,
+    brushRadius: 15,
     randomSeed: 0,
     kill: 0,
 }
