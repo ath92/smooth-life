@@ -70,16 +70,16 @@ vec3 sum1(vec3 v) {
 
 vec3 getBiasedVal(vec3 val, vec3 redBias, vec3 greenBias, vec3 blueBias) {
     return vec3(
-        redBias.x * val.x + redBias.y * val.x + redBias.z * val.x,
-        greenBias.x * val.y + greenBias.y * val.y + greenBias.z * val.y,
-        blueBias.x * val.z + blueBias.y * val.z + blueBias.z * val.z
+        redBias.x * val.x + redBias.y * val.y + redBias.z * val.z,
+        greenBias.x * val.x + greenBias.y * val.y + greenBias.z * val.z,
+        blueBias.x * val.x + blueBias.y * val.y + blueBias.z * val.z
     );
 }
 
 void main()
 {
-    vec3 redBias = sum1(vec3(0.5, 0.3, -0.2));
-    vec3 greenBias = sum1(vec3(0.3, 0.5, -0.2));
+    vec3 redBias = sum1(vec3(0.5, 0.0, -0.2));
+    vec3 greenBias = sum1(vec3(0.0, 0.5, -0.2));
     vec3 blueBias = sum1(vec3(-1.2, 0.3, 1.5));
 
     vec2 uv = gl_FragCoord.xy / resolution.xy;
