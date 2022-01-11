@@ -7,8 +7,6 @@ window.addEventListener("mousemove", e => {
     mouseY = e.clientY
 })
 let isMouseDown = false;
-window.addEventListener("mousedown", () => isMouseDown = true)
-window.addEventListener("mouseup", () => isMouseDown = false)
 
 const state = {
     dt: 0.5,
@@ -45,11 +43,13 @@ function initStateBindings() {
     killBtn.addEventListener("mousedown", () => state.kill = 1)
     killBtn.addEventListener("mouseup", () => state.kill = 0)
 
+    document.querySelector("canvas").addEventListener("mousedown", () => isMouseDown = true)
+    document.querySelector("canvas").addEventListener("mouseup", () => isMouseDown = false)
 };
 
-initStateBindings();
-
 const regl = Regl()
+
+initStateBindings();
 
 const textureOptions = {
     width: window.innerWidth,
@@ -202,7 +202,9 @@ const drawBrushStroke = regl({
 
 const getFBOs = createPingPongBuffers();
 regl.frame(() => {
+
     if (isMouseDown) {
+        console.log("drawing brush")
         const [read, write] = getFBOs();
         write.use(() => {
             drawBrushStroke({
