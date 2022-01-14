@@ -52,7 +52,8 @@
             .controls h2 {
                 color: #fff;
                 font-size: 1rem;
-                margin: .5rem;
+                margin: 0;
+                padding: .5rem;
             }
 
             .controls > button:last-child {
@@ -76,88 +77,131 @@
             .controls.hidden {
                 transform: translateY(-95%);
             }
+
+            .collapsible > *:not(h2) {
+                transition: height .4s;
+                overflow: hidden;
+                box-sizing: border-box;
+            }
+
+            .collapsible.collapsed > *:not(h2){
+                height: 0;
+                padding: 0;/* hack*/
+            }
+
+            .collapsible h2 {
+                position: relative;
+                cursor: pointer;
+            }
+
+            .collapsible h2::after{
+                display: block;
+                content: "⌃";
+                padding: .75rem;
+                color: #ccc;
+                position: absolute;
+                font-size: .75rem;
+                top: 0;
+                right: 0;
+            }
+
+            .collapsible h2:hover::after {
+                color: #fff;
+            }
         </style>
     </head>
     <body>
         <section class="controls">
-            <h2>Life settings</h2>
+            <section class="collapsible">
+                <h2>Life settings</h2>
 
-            <label>
-                <span>Delta time</span>
-                <input data-state="dt" type="range" min="0.1" max="1" step="0.001" />
-            </label>
+                <label>
+                    <span>Delta time</span>
+                    <input data-state="dt" type="range" min="0.1" max="1" step="0.001" />
+                </label>
 
-            <label>
-                <span>Outer radius</span>
-                <input data-state="outerRadius" type="range" min="1" max="24" step="0.01" />
-            </label>
+                <label>
+                    <span>Outer radius</span>
+                    <input data-state="outerRadius" type="range" min="1" max="24" step="0.01" />
+                </label>
 
-            <label>
-                <span>Ratio of radii</span>
-                <input data-state="ratioOfRadii" type="range" min="1" max="6" step="0.01" />
-            </label>
+                <label>
+                    <span>Ratio of radii</span>
+                    <input data-state="ratioOfRadii" type="range" min="1" max="6" step="0.01" />
+                </label>
 
-            <label>
-                <span>Birth 1</span>
-                <input data-state="birth1" type="range" min="0.1" max="1.0" step="0.001" />
-            </label>
+                <label>
+                    <span>Birth 1</span>
+                    <input data-state="birth1" type="range" min="0.1" max="1.0" step="0.001" />
+                </label>
 
-            <label>
-                <span>Death 1</span>
-                <input data-state="survival1" type="range" min="0.1" max="1.0" step="0.001" />
-            </label>
+                <label>
+                    <span>Death 1</span>
+                    <input data-state="survival1" type="range" min="0.1" max="1.0" step="0.001" />
+                </label>
 
-            <label>
-                <span>Birth 2</span>
-                <input data-state="birth2" type="range" min="0.1" max="1.0" step="0.001" />
-            </label>
+                <label>
+                    <span>Birth 2</span>
+                    <input data-state="birth2" type="range" min="0.1" max="1.0" step="0.001" />
+                </label>
 
-            <label>
-                <span>Death 2</span>
-                <input data-state="survival2" type="range" min="0.1" max="1.0" step="0.001" />
-            </label>
+                <label>
+                    <span>Death 2</span>
+                    <input data-state="survival2" type="range" min="0.1" max="1.0" step="0.001" />
+                </label>
 
-            <label>
-                <span>Inner fullness</span>
-                <input data-state="fullness1" type="range" min="0.01" max="0.2" step="0.001" />
-            </label>
+                <label>
+                    <span>Inner fullness</span>
+                    <input data-state="fullness1" type="range" min="0.01" max="0.2" step="0.001" />
+                </label>
 
-            <label>
-                <span>Outer fullness</span>
-                <input data-state="fullness2" type="range" min="0.01" max="0.5" step="0.001" />
-            </label>
+                <label>
+                    <span>Outer fullness</span>
+                    <input data-state="fullness2" type="range" min="0.01" max="0.5" step="0.001" />
+                </label>
+            </section>
 
-            <h2>Initialization settings</h2>
+            <section class="collapsible">
+                <h2>Initialization settings</h2>
 
-            <label>
-                <span>Brush radius</span>
-                <input data-state="brushRadius" type="range" min="1" max="50" step="0.01" />
-            </label>
+                <label>
+                    <span>Brush radius</span>
+                    <input data-state="brushRadius" type="range" min="1" max="50" step="0.01" />
+                </label>
 
-            <label>
-                <span>Brush red</span>
-                <input data-state="brushRed" type="range" min="0" max="1" step="0.01" />
-            </label>
+                <label>
+                    <span>Brush red</span>
+                    <input data-state="brushRed" type="range" min="0" max="1" step="0.01" />
+                </label>
 
-            <label>
-                <span>Brush green</span>
-                <input data-state="brushGreen" type="range" min="0" max="1" step="0.01" />
-            </label>
+                <label>
+                    <span>Brush green</span>
+                    <input data-state="brushGreen" type="range" min="0" max="1" step="0.01" />
+                </label>
 
-            <label>
-                <span>Brush blue</span>
-                <input data-state="brushBlue" type="range" min="0" max="1" step="0.01" />
-            </label>
-            
-            
-            <label>
-                <span>Seed / kill</span>
-                <button id="randomSeed">Seed!</button>
-                <button id="kill">Kill!</button>
-            </label>
+                <label>
+                    <span>Brush blue</span>
+                    <input data-state="brushBlue" type="range" min="0" max="1" step="0.01" />
+                </label>
+                
+                
+                <label>
+                    <span>Seed / kill</span>
+                    <button id="randomSeed">Seed!</button>
+                    <button id="kill">Kill!</button>
+                </label>
+            </section>
 
             <button onClick="document.querySelector('.controls').classList.toggle('hidden')">⌃</button>
         </section>
+        <script type="text/javascript">
+            Array.from(document.querySelectorAll(".collapsible h2")).forEach(e => {
+                e.addEventListener("click", (e) => {
+                    const parentCollapsible = e.target.closest(".collapsible");
+                    parentCollapsible.classList.toggle("collapsed")
+                })
+            })
+        </script>
         <script src="main.js" type="module"></script>
     </body>
 </html>
