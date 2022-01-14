@@ -1,6 +1,8 @@
 import Regl from "regl";
 import frag from "./frag.glsl";
 
+// --- State management
+
 let mouseX, mouseY;
 window.addEventListener("mousemove", e => {
     mouseX = e.clientX
@@ -58,200 +60,225 @@ function initStateBindings() {
     killBtn.addEventListener("mousedown", () => state.kill = 1)
     killBtn.addEventListener("mouseup", () => state.kill = 0)
 
-    document.querySelector("canvas").addEventListener("mousedown", () => isMouseDown = true)
-    document.querySelector("canvas").addEventListener("mouseup", () => isMouseDown = false)
-};
-
-const regl = Regl()
-
-initStateBindings();
-
-const textureOptions = {
-    width: window.innerWidth,
-    height: window.innerHeight,
-}
-
-const createPingPongBuffers = () => {
-    const tex1 = regl.texture(textureOptions);
-    const tex2 = regl.texture(textureOptions);
-    const one = regl.framebuffer({
-        color: tex1,
-        depthStencil: false
-    });
-    const two = regl.framebuffer({
-        color: tex2,
-        depthStencil: false
-    });
-    let flip = false
-    return () => {
-        flip = !flip
-        return flip ? [one, two] : [two, one]
-    }
-};
-
-let frame = 0;
-const drawLife = regl({
-    frag,
-  
-    vert: `
-        attribute vec2 position;
-        void main() {
-        gl_Position = vec4(position, 0, 1);
+    window.addEventListener("mouseup", e => {
+        if (e.target.tagName === "CANVAS") {
+            isMouseDown = false;
         }
-    `,
-  
-    attributes: {
-        position: [
-            [-1, 1], [1, 1], [1, -1],
-            [1, -1], [-1, -1], [-1, 1],
-        ]
-    },
+    });
+    window.addEventListener("mousedown", e => {
+        if (e.target.tagName === "CANVAS") {
+            isMouseDown = true;
+        }
+    });
+};
 
-    uniforms: {
-        resolution: ctx => [ctx.viewportWidth, ctx.viewportHeight],
-        currentFrame: () => ++frame,
-        mouse: () => [
-            mouseX / window.innerWidth,
-            mouseY / window.innerHeight,
-            isMouseDown ? 1 : 0,
-        ],
-        readTexture: regl.prop("readTexture"),
 
-        dt: () => state.dt,
-        ra: () => state.outerRadius,
-        rr: () => state.ratioOfRadii,
-        b1: () => state.birth1,
-        b2: () => state.birth2,
-        s1: () => state.survival1,
-        s2: () => state.survival2,
-        alpha_n: () => state.fullness1,
-        alpha_m: () => state.fullness2,
+// --- Actual simulation
 
-        color_conv: () => {
-            return [
-                state.rr, state.rg, state.rb,
-                state.gr, state.gg, state.gb,
-                state.br, state.bg, state.bb,
-            ];
+function initSimulation() {
+    let width = window.innerWidth / 2;
+    let height = window.innerHeight / 2;
+
+    const regl = Regl()
+
+    let frame = 0;
+    const drawLife = regl({
+        frag,
+    
+        vert: `
+            attribute vec2 position;
+            void main() {
+            gl_Position = vec4(position, 0, 1);
+            }
+        `,
+    
+        attributes: {
+            position: [
+                [-1, 1], [1, 1], [1, -1],
+                [1, -1], [-1, -1], [-1, 1],
+            ]
         },
 
-        randomSeed: () => state.randomSeed,
-        kill: () => state.kill,
-    },
-  
-    count: 6
-})
+        uniforms: {
+            resolution: ctx => [ctx.viewportWidth, ctx.viewportHeight],
+            currentFrame: () => ++frame,
+            mouse: () => [
+                mouseX / width,
+                mouseY / height,
+                isMouseDown ? 1 : 0,
+            ],
+            readTexture: regl.prop("readTexture"),
 
-// render texture to screen
-const drawToCanvas = regl({
-    vert: `
-        precision highp float;
-        attribute vec2 position;
-        varying vec2 uv;
-        void main() {
-            uv = position;
-            gl_Position = vec4(position, 0, 1);
+            dt: () => state.dt,
+            ra: () => state.outerRadius,
+            rr: () => state.ratioOfRadii,
+            b1: () => state.birth1,
+            b2: () => state.birth2,
+            s1: () => state.survival1,
+            s2: () => state.survival2,
+            alpha_n: () => state.fullness1,
+            alpha_m: () => state.fullness2,
+
+            color_conv: () => {
+                return [
+                    state.rr, state.rg, state.rb,
+                    state.gr, state.gg, state.gb,
+                    state.br, state.bg, state.bb,
+                ];
+            },
+
+            randomSeed: () => state.randomSeed,
+            kill: () => state.kill,
+        },
+    
+        count: 6
+    })
+
+    // render texture to screen
+    const drawToCanvas = regl({
+        vert: `
+            precision highp float;
+            attribute vec2 position;
+            varying vec2 uv;
+            void main() {
+                uv = position;
+                gl_Position = vec4(position, 0, 1);
+            }
+        `,
+        frag: `
+            precision highp float;
+            uniform sampler2D readTexture;
+            varying vec2 uv;
+
+            void main () {
+            vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
+            gl_FragColor = color;
+            }
+        `,
+        uniforms: {
+            readTexture: regl.prop('readTexture'),
+        },
+        attributes: {
+            position: [
+                [-1, 1], [1, 1], [1, -1],
+                [1, -1], [-1, -1], [-1, 1],
+            ]
+        },
+        count: 6,
+    });
+
+
+    const drawBrushStroke = regl({
+        vert: `
+            precision highp float;
+            attribute vec2 position;
+            varying vec2 uv;
+            void main() {
+                uv = position;
+                gl_Position = vec4(position, 0, 1);
+            }
+        `,
+        frag: `
+            precision highp float;
+            uniform sampler2D readTexture;
+            uniform vec3 mouse;
+            uniform float brushRadius;
+            uniform float currentFrame;
+            uniform vec3 brushColor;
+            varying vec2 uv;
+
+            float rand(vec2 co){
+                return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+            }
+
+            void main () {
+            vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
+            if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius){
+                color = vec4(brushColor, 1);
+            }
+            gl_FragColor = color;
+            }
+        `,
+        uniforms: {
+            readTexture: regl.prop('readTexture'),
+            mouse: () => [
+                mouseX / (window.innerWidth / width),
+                (window.innerHeight - mouseY) / (window.innerHeight / height),
+                isMouseDown ? 1 : 0,
+            ],
+            currentFrame: () => frame,
+
+            brushRadius: () => state.brushRadius,
+            brushColor: () => [
+                state.brushRed,
+                state.brushGreen,
+                state.brushBlue,
+            ],
+        },
+        attributes: {
+            position: [
+                [-1, 1], [1, 1], [1, -1],
+                [1, -1], [-1, -1], [-1, 1],
+            ]
+        },
+        count: 6,
+    })
+
+    const textureOptions = {
+        width,
+        height,
+        mag: "linear"
+    };
+    
+    const createPingPongBuffers = () => {
+        const tex1 = regl.texture(textureOptions);
+        const tex2 = regl.texture(textureOptions);
+        const one = regl.framebuffer({
+            color: tex1,
+            depthStencil: false
+        });
+        const two = regl.framebuffer({
+            color: tex2,
+            depthStencil: false
+        });
+        let flip = false
+        return () => {
+            flip = !flip
+            return flip ? [one, two] : [two, one]
         }
-    `,
-    frag: `
-        precision highp float;
-        uniform sampler2D readTexture;
-        varying vec2 uv;
-
-        void main () {
-          vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
-          gl_FragColor = color;
+    };
+    const getFBOs = createPingPongBuffers();
+    regl.frame(() => {
+    
+        if (isMouseDown) {
+            console.log("drawing brush")
+            const [read, write] = getFBOs();
+            write.use(() => {
+                drawBrushStroke({
+                    readTexture: read,
+                });
+            });
         }
-    `,
-    uniforms: {
-        readTexture: regl.prop('readTexture'),
-    },
-    attributes: {
-        position: [
-            [-1, 1], [1, 1], [1, -1],
-            [1, -1], [-1, -1], [-1, 1],
-        ]
-    },
-    count: 6,
-});
-
-
-const drawBrushStroke = regl({
-    vert: `
-        precision highp float;
-        attribute vec2 position;
-        varying vec2 uv;
-        void main() {
-            uv = position;
-            gl_Position = vec4(position, 0, 1);
-        }
-    `,
-    frag: `
-        precision highp float;
-        uniform sampler2D readTexture;
-        uniform vec3 mouse;
-        uniform float brushRadius;
-        uniform float currentFrame;
-        uniform vec3 brushColor;
-        varying vec2 uv;
-
-        float rand(vec2 co){
-            return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
-        }
-
-        void main () {
-          vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
-          if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius){
-            color = vec4(brushColor, 1);
-          }
-          gl_FragColor = color;
-        }
-    `,
-    uniforms: {
-        readTexture: regl.prop('readTexture'),
-        mouse: () => [
-            mouseX,
-            window.innerHeight - mouseY,
-            isMouseDown ? 1 : 0,
-        ],
-        currentFrame: () => frame,
-
-        brushRadius: () => state.brushRadius,
-        brushColor: () => [
-            state.brushRed,
-            state.brushGreen,
-            state.brushBlue,
-        ],
-    },
-    attributes: {
-        position: [
-            [-1, 1], [1, 1], [1, -1],
-            [1, -1], [-1, -1], [-1, 1],
-        ]
-    },
-    count: 6,
-})
-
-const getFBOs = createPingPongBuffers();
-regl.frame(() => {
-
-    if (isMouseDown) {
-        console.log("drawing brush")
+    
         const [read, write] = getFBOs();
         write.use(() => {
-            drawBrushStroke({
+            drawLife({
                 readTexture: read,
             });
         });
-    }
-
-    const [read, write] = getFBOs();
-    write.use(() => {
-        drawLife({
-            readTexture: read,
+        drawToCanvas({
+            readTexture: write
         });
-    });
-    drawToCanvas({
-        readTexture: write
-    });
-})
+    })
+
+    return () => regl.destroy();
+}
+
+let cleanup = initSimulation();
+
+initStateBindings();
+
+window.addEventListener("resize", () => {
+    cleanup?.();
+    cleanup = initSimulation();
+});
