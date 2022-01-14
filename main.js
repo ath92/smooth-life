@@ -22,7 +22,7 @@ window.state = {
     survival2: 0.549,
     fullness1: 0.028,
     fullness2: 0.147,
-    
+
     "rr": -0.546,
     "rg": 0.295,
     "rb": 0.685,
@@ -115,12 +115,7 @@ function initSimulation() {
 
         uniforms: {
             resolution: ctx => [ctx.viewportWidth, ctx.viewportHeight],
-            currentFrame: () => ++frame,
-            mouse: () => [
-                mouseX / width,
-                mouseY / height,
-                isMouseDown ? 1 : 0,
-            ],
+            currentFrame: () => frame,
             readTexture: regl.prop("readTexture"),
 
             dt: () => state.dt,
@@ -140,9 +135,6 @@ function initSimulation() {
                     state.br, state.bg, state.bb,
                 ];
             },
-
-            randomSeed: () => state.randomSeed,
-            kill: () => state.kill,
         },
     
         count: 6
@@ -182,7 +174,7 @@ function initSimulation() {
     });
 
 
-    const drawBrushStroke = regl({
+    const drawInitializer = regl({
         vert: `
             precision highp float;
             attribute vec2 position;
@@ -199,18 +191,35 @@ function initSimulation() {
             uniform float brushRadius;
             uniform float currentFrame;
             uniform vec3 brushColor;
+            uniform float randomSeed;
             varying vec2 uv;
+
+            // 1 out, 3 in... <https://www.shadertoy.com/view/4djSRW>
+            #define MOD3 vec3(.1031,.11369,.13787)
+            float hash13(vec3 p3) {
+                p3 = fract(p3 * MOD3);
+                p3 += dot(p3, p3.yzx+19.19);
+                return fract((p3.x + p3.y)*p3.z);
+            }
 
             float rand(vec2 co){
                 return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
             }
 
             void main () {
-            vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
-            if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius){
-                color = vec4(brushColor, 1);
-            }
-            gl_FragColor = color;
+                vec4 color = texture2D(readTexture, uv * 0.5 + 0.5);
+                if (mouse.z > 0.5 && distance(mouse.xy, gl_FragCoord.xy) < brushRadius){
+                    color = vec4(brushColor, 1);
+                }
+                if (randomSeed > 0.5) {
+                    color = vec4(
+                        hash13(vec3(gl_FragCoord.xy, currentFrame)),
+                        hash13(vec3(gl_FragCoord.xy, currentFrame + 1.)),
+                        hash13(vec3(gl_FragCoord.xy, currentFrame + 2.)),
+                        1
+                    );
+                }
+                gl_FragColor = color;
             }
         `,
         uniforms: {
@@ -228,6 +237,9 @@ function initSimulation() {
                 state.brushGreen,
                 state.brushBlue,
             ],
+
+            randomSeed: () => state.randomSeed,
+            kill: () => state.kill,
         },
         attributes: {
             position: [
@@ -263,12 +275,10 @@ function initSimulation() {
     };
     const getFBOs = createPingPongBuffers();
     regl.frame(() => {
-    
-        if (isMouseDown || frame < 10) {
-            console.log("drawing brush", mouseX, mouseY)
+        if (isMouseDown || frame < 10 || state.randomSeed) {
             const [read, write] = getFBOs();
             write.use(() => {
-                drawBrushStroke({
+                drawInitializer({
                     readTexture: read,
                 });
             });
@@ -283,6 +293,7 @@ function initSimulation() {
         drawToCanvas({
             readTexture: write
         });
+        frame++;
     })
 
     return () => regl.destroy();

@@ -7,9 +7,6 @@ precision lowp float;
 uniform float currentFrame;
 uniform vec2 resolution;
 uniform sampler2D readTexture;
-uniform vec3 mouse;
-uniform float randomSeed;
-uniform float kill;
 uniform float dt;
 uniform mat3 color_conv;
 // based on <https://git.io/vz29Q>
@@ -56,14 +53,6 @@ vec3 s(vec3 n,vec3 m)
 float ramp_step(float x,float a,float ea)
 {
     return clamp((x-a)/ea + 0.5,0.0,1.0);
-}
-
-// 1 out, 3 in... <https://www.shadertoy.com/view/4djSRW>
-#define MOD3 vec3(.1031,.11369,.13787)
-float hash13(vec3 p3) {
-	p3 = fract(p3 * MOD3);
-    p3 += dot(p3, p3.yzx+19.19);
-    return fract((p3.x + p3.y)*p3.z);
 }
 
 vec3 sum1(vec3 v) {
@@ -116,16 +105,5 @@ void main()
     vec3 prev = texture2D(readTexture, gl_FragCoord.xy / resolution.xy).xyz;
     // square dt to get a nicer UX out of the slider
     vec3 c = prev + dt*dt * (s(outf,inf) - prev);
-    if(randomSeed > 0.5) { //  || mouse.z > 0.
-        //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
-        c = vec3(
-            hash13(vec3(gl_FragCoord.xy, currentFrame)),
-            hash13(vec3(gl_FragCoord.xy, currentFrame + 1.)),
-            hash13(vec3(gl_FragCoord.xy, currentFrame + 2.))
-        );
-    }
-    if (kill > 0.5) {
-        c = vec3(0.);
-    }
     gl_FragColor = vec4(c,1);
 }
