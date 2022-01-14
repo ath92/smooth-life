@@ -3,15 +3,17 @@ import frag from "./frag.glsl";
 
 // --- State management
 
-let mouseX, mouseY;
+let mouseX = window.innerWidth / 2;
+let mouseY = window.innerHeight / 2;
 window.addEventListener("mousemove", e => {
     mouseX = e.clientX
     mouseY = e.clientY
 })
 let isMouseDown = false;
 
-const state = {
-    dt: 0.5,
+
+window.state = {
+    dt: 0.441,
     outerRadius: 8,
     ratioOfRadii: 3,
     birth1: 0.257,
@@ -20,18 +22,16 @@ const state = {
     survival2: 0.549,
     fullness1: 0.028,
     fullness2: 0.147,
-
-    rr: 0.5,
-    rg: 0.0,
-    rb: -0.2,
     
-    gr: 0.5,
-    gg: 0.5,
-    gb: 0.2,
-
-    br: -0.6,
-    bg: 0.28,
-    bb: 1,
+    "rr": -0.546,
+    "rg": 0.295,
+    "rb": 0.685,
+    "gr": -0.646,
+    "gg": 0.658,
+    "gb": 0.552,
+    "br": 0.477,
+    "bg": 0.627,
+    "bb": -0.532,
 
     brushRadius: 15,
     brushRed: 0.8,
@@ -41,14 +41,27 @@ const state = {
     kill: 0,
 }
 
+function setState(partial) {
+    Object.entries(partial).forEach(([key, value]) => {
+        state[key] = value;
+    })
+    const params = new URLSearchParams(state);
+    window.history.replaceState({}, '', `${location.pathname}?${params}`);
+}
+
 function initStateBindings() {
-    Object.entries(state).forEach(([key, value]) => {
+    const params = Object.fromEntries(new URLSearchParams(location.search).entries());
+    console.log(state, params, {...state, ...params})
+    Object.entries({ ...state, ...params }).forEach(([key, value]) => {
         const boundEl = document.querySelector(`[data-state="${key}"]`);
         if (!boundEl) return;
 
         boundEl.value = value;
+        state[key] = parseFloat(value);
         boundEl.addEventListener("input", (e) => {
-            state[key] = parseFloat(e.target.value);
+            setState({
+                [key]: parseFloat(e.target.value)
+            })
         })
     })
 
@@ -72,6 +85,7 @@ function initStateBindings() {
     });
 };
 
+initStateBindings();
 
 // --- Actual simulation
 
@@ -204,7 +218,7 @@ function initSimulation() {
             mouse: () => [
                 mouseX / (window.innerWidth / width),
                 (window.innerHeight - mouseY) / (window.innerHeight / height),
-                isMouseDown ? 1 : 0,
+                isMouseDown || frame < 10 ? 1 : 0,
             ],
             currentFrame: () => frame,
 
@@ -250,8 +264,8 @@ function initSimulation() {
     const getFBOs = createPingPongBuffers();
     regl.frame(() => {
     
-        if (isMouseDown) {
-            console.log("drawing brush")
+        if (isMouseDown || frame < 10) {
+            console.log("drawing brush", mouseX, mouseY)
             const [read, write] = getFBOs();
             write.use(() => {
                 drawBrushStroke({
@@ -275,8 +289,6 @@ function initSimulation() {
 }
 
 let cleanup = initSimulation();
-
-initStateBindings();
 
 window.addEventListener("resize", () => {
     cleanup?.();

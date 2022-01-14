@@ -116,7 +116,7 @@ void main()
     vec3 prev = texture2D(readTexture, gl_FragCoord.xy / resolution.xy).xyz;
     // square dt to get a nicer UX out of the slider
     vec3 c = prev + dt*dt * (s(outf,inf) - prev);
-    if(randomSeed > 0.5 || currentFrame <= 1.) { //  || mouse.z > 0.
+    if(randomSeed > 0.5) { //  || mouse.z > 0.
         //c = hash13(vec3(fragCoord,frame)) - texture(iChannel1, uv).x + 0.5;
         c = vec3(
             hash13(vec3(gl_FragCoord.xy, currentFrame)),
