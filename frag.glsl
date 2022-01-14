@@ -11,7 +11,7 @@ uniform vec3 mouse;
 uniform float randomSeed;
 uniform float kill;
 uniform float dt;
-
+uniform mat3 color_conv;
 // based on <https://git.io/vz29Q>
 // ---------------------------------------------
 // smoothglider (discrete time stepping 2D)
@@ -80,10 +80,10 @@ vec3 getBiasedVal(vec3 val, vec3 redBias, vec3 greenBias, vec3 blueBias) {
 
 void main()
 {
-    vec3 redBias = sum1(vec3(0.5, 0.0, -0.2));
+    vec3 redBias = sum1(color_conv[0]);
 
-    vec3 greenBias = sum1(vec3(0.5, 0.5, 0.2));
-    vec3 blueBias = sum1(vec3(-0.6, 0.28, 1.));
+    vec3 greenBias = sum1(color_conv[1]);
+    vec3 blueBias = sum1(color_conv[2]);
 
     vec2 uv = gl_FragCoord.xy / resolution.xy;
     const float maxRa = 24.;

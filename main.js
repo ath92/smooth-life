@@ -19,6 +19,18 @@ const state = {
     fullness1: 0.028,
     fullness2: 0.147,
 
+    rr: 0.5,
+    rg: 0.0,
+    rb: -0.2,
+    
+    gr: 0.5,
+    gg: 0.5,
+    gb: 0.2,
+
+    br: -0.6,
+    bg: 0.28,
+    bb: 1,
+
     brushRadius: 15,
     brushRed: 0.8,
     brushGreen: 0.9,
@@ -82,10 +94,11 @@ const drawLife = regl({
     frag,
   
     vert: `
-    attribute vec2 position;
-    void main() {
-      gl_Position = vec4(position, 0, 1);
-    }`,
+        attribute vec2 position;
+        void main() {
+        gl_Position = vec4(position, 0, 1);
+        }
+    `,
   
     attributes: {
         position: [
@@ -113,6 +126,15 @@ const drawLife = regl({
         s2: () => state.survival2,
         alpha_n: () => state.fullness1,
         alpha_m: () => state.fullness2,
+
+        color_conv: () => {
+            return [
+                state.rr, state.rg, state.rb,
+                state.gr, state.gg, state.gb,
+                state.br, state.bg, state.bb,
+            ];
+        },
+
         randomSeed: () => state.randomSeed,
         kill: () => state.kill,
     },
