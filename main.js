@@ -192,7 +192,9 @@ function initSimulation() {
             uniform float currentFrame;
             uniform vec3 brushColor;
             uniform float randomSeed;
+            uniform float kill;
             varying vec2 uv;
+
 
             // 1 out, 3 in... <https://www.shadertoy.com/view/4djSRW>
             #define MOD3 vec3(.1031,.11369,.13787)
@@ -218,6 +220,9 @@ function initSimulation() {
                         hash13(vec3(gl_FragCoord.xy, currentFrame + 2.)),
                         1
                     );
+                }
+                if (kill > 0.5) {
+                    color = vec4(vec3(0.), 1.);
                 }
                 gl_FragColor = color;
             }
@@ -275,7 +280,7 @@ function initSimulation() {
     };
     const getFBOs = createPingPongBuffers();
     regl.frame(() => {
-        if (isMouseDown || frame < 10 || state.randomSeed) {
+        if (isMouseDown || frame < 10 || state.randomSeed || state.kill) {
             const [read, write] = getFBOs();
             write.use(() => {
                 drawInitializer({
