@@ -95,6 +95,56 @@ function initSimulation() {
 
     const regl = Regl()
 
+    const kernelTexture = regl.texture({
+        width: state.outerRadius,
+        height: state.outerRadius,
+    });
+
+    const kernelFbo = regl.framebuffer({
+        color: kernelTexture,
+        depthStencil: false,
+    });
+
+    const drawKernel = regl({
+        vert: `
+            precision highp float;
+            attribute vec2 position;
+            varying vec2 uv;
+            void main() {
+                uv = position;
+                gl_Position = vec4(position, 0, 1);
+            }
+        `,
+        frag: `
+            precision highp float;
+            uniform float ra;
+
+            void main() {
+                vec2 center = vec2(ra / 2.);
+                float d = distance(center, gl_FragCoord.xy);
+                float c = .5 * sin(d) + .5;
+                gl_FragColor = vec4(vec3(c), 1.);
+            }
+        `,
+
+        attributes: {
+            position: [
+                [-1, 1], [1, 1], [1, -1],
+                [1, -1], [-1, -1], [-1, 1],
+            ]
+        },
+        count: 6,
+
+        uniforms: {
+            ra: () => state.outerRadius,
+            rr: () => state.ratioOfRadii,
+        },
+    });
+        
+    kernelFbo.use(() => {
+        drawKernel();
+    });
+
     let frame = 0;
     const drawLife = regl({
         frag,
@@ -135,6 +185,8 @@ function initSimulation() {
                     state.br, state.bg, state.bb,
                 ];
             },
+
+            kernel: kernelFbo,
         },
     
         count: 6
@@ -253,7 +305,7 @@ function initSimulation() {
             ]
         },
         count: 6,
-    })
+    });
 
     const textureOptions = {
         width,
@@ -298,7 +350,7 @@ function initSimulation() {
         drawToCanvas({
             readTexture: write
         });
-        frame++;
+        frame++
     })
 
     return () => regl.destroy();

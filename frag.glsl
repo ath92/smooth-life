@@ -9,6 +9,7 @@ uniform vec2 resolution;
 uniform sampler2D readTexture;
 uniform float dt;
 uniform mat3 color_conv;
+uniform sampler2D kernelTexture;
 // based on <https://git.io/vz29Q>
 // ---------------------------------------------
 // smoothglider (discrete time stepping 2D)
@@ -22,32 +23,34 @@ uniform float alpha_n;   // sigmoid width for outer fullness
 uniform float alpha_m;   // sigmoid width for inner fullness
 // ---------------------------------------------
 
-
 const vec3 h3 = vec3(.5);
 
 vec3 sigma1(vec3 x,vec3 a,float alpha) 
 { 
-    return 1.0 / ( 1.0 + exp( -(x-a)*4.0/alpha ) );
+    return 1.0 / (1.0 + exp(-(x - a) * 4.0 / alpha));
 }
 
 vec3 sigma2(vec3 x,vec3 a,vec3 b,float alpha)
 {
-    return sigma1(x,a,alpha) 
-        * ( 1.0-sigma1(x,b,alpha) );
+    return sigma1(x,a,alpha) * (1.0 - sigma1(x,b,alpha));
 }
 
 vec3 sigma_m(float x,float y,vec3 m,float alpha)
 {
-    return x * ( 1.0-sigma1(m,h3,alpha) ) 
-        + y * sigma1(m,h3,alpha);
+    return x * (1.0 - sigma1(m,h3,alpha)) 
+         + y * sigma1(m,h3,alpha);
 }
 
 // the transition function
 // (n = outer fullness, m = inner fullness)
 vec3 s(vec3 n,vec3 m)
 {
-    return sigma2( n, sigma_m(b1,s1,m,alpha_m), 
-        sigma_m(b2,s2,m,alpha_m), alpha_n );
+    return sigma2(
+        n,
+        sigma_m(b1,s1,m,alpha_m), 
+        sigma_m(b2,s2,m,alpha_m),
+        alpha_n
+    );
 }
 
 float ramp_step(float x,float a,float ea)

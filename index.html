@@ -109,6 +109,29 @@
             .collapsible h2:hover::after {
                 color: #fff;
             }
+
+            @media only screen and (max-width: 800px) {
+                .collapsible.collapsed > *:not(h2){
+                    height: auto;
+                }
+
+                .controls label {
+                    padding: .25rem .5rem;
+                }
+
+                .collapsible:not(.collapsed) > *:not(h2) {
+                    height: 0;
+                    padding: 0;
+                }
+
+                .controls {
+                    transform: translateY(-80%);
+                }
+
+                .controls.hidden {
+                    transform: translateY(0%);
+                }
+            }
         </style>
     </head>
     <body>
