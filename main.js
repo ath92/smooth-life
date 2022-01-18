@@ -13,25 +13,20 @@ let isMouseDown = false;
 
 
 window.state = {
-    dt: 0.441,
-    outerRadius: 8,
-    ratioOfRadii: 3,
-    birth1: 0.257,
-    birth2: 0.336,
-    survival1: 0.365,
-    survival2: 0.549,
-    fullness1: 0.028,
-    fullness2: 0.147,
+    dt: 0.3,
+    kernelSize: 13,
+    center: 0.15,
+    stddev: 0.001,
 
-    "rr": -0.546,
-    "rg": 0.295,
-    "rb": 0.685,
-    "gr": -0.646,
-    "gg": 0.658,
-    "gb": 0.552,
-    "br": 0.477,
-    "bg": 0.627,
-    "bb": -0.532,
+    "rr": 0.5,
+    "rg": 0.5,
+    "rb": 0.5,
+    "gr": 0.5,
+    "gg": 0.5,
+    "gb": 0.5,
+    "br": 0.5,
+    "bg": 0.5,
+    "bb": 0.5,
 
     brushRadius: 15,
     brushRed: 0.8,
@@ -95,9 +90,12 @@ function initSimulation() {
 
     const regl = Regl()
 
+    const kernelSize = () => state.kernelSize * 4; // multiply by 4 to get a smoother kernel texture, use actual value in shader
+
     const kernelTexture = regl.texture({
-        width: state.outerRadius,
-        height: state.outerRadius,
+        width: kernelSize(),
+        height: kernelSize(),
+        mag: 'linear',
     });
 
     const kernelFbo = regl.framebuffer({
@@ -121,8 +119,13 @@ function initSimulation() {
 
             void main() {
                 vec2 center = vec2(ra / 2.);
-                float d = distance(center, gl_FragCoord.xy);
-                float c = .5 * sin(d) + .5;
+                float d = distance(center, gl_FragCoord.xy) / ra * 10.;
+                float c = sin(d - 1.);
+                c = max(c, 0.);
+                c = sqrt(c);
+                if (distance(center, gl_FragCoord.xy) > ra / 2.) {
+                    c = 0.;
+                }
                 gl_FragColor = vec4(vec3(c), 1.);
             }
         `,
@@ -136,8 +139,7 @@ function initSimulation() {
         count: 6,
 
         uniforms: {
-            ra: () => state.outerRadius,
-            rr: () => state.ratioOfRadii,
+            ra: kernelSize,
         },
     });
         
@@ -169,14 +171,9 @@ function initSimulation() {
             readTexture: regl.prop("readTexture"),
 
             dt: () => state.dt,
-            ra: () => state.outerRadius,
-            rr: () => state.ratioOfRadii,
-            b1: () => state.birth1,
-            b2: () => state.birth2,
-            s1: () => state.survival1,
-            s2: () => state.survival2,
-            alpha_n: () => state.fullness1,
-            alpha_m: () => state.fullness2,
+            ra: () => state.kernelSize,
+            center: () => state.center,
+            stdDev: () => state.stddev,
 
             color_conv: () => {
                 return [
@@ -186,7 +183,7 @@ function initSimulation() {
                 ];
             },
 
-            kernel: kernelFbo,
+            kernelTexture: kernelFbo,
         },
     
         count: 6
@@ -332,6 +329,12 @@ function initSimulation() {
     };
     const getFBOs = createPingPongBuffers();
     regl.frame(() => {
+        if (!true) {
+            drawToCanvas({
+                readTexture: kernelFbo,
+            });
+            return;
+        }
         if (isMouseDown || frame < 10 || state.randomSeed || state.kill) {
             const [read, write] = getFBOs();
             write.use(() => {
