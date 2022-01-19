@@ -15,6 +15,8 @@ let isMouseDown = false;
 window.state = {
     dt: 0.3,
     kernelSize: 13,
+    rr: 2,
+    nc: 4,
     center: 0.15,
     stddev: 0.001,
 
@@ -116,17 +118,29 @@ function initSimulation() {
         frag: `
             precision highp float;
             uniform float ra;
+            uniform float rr;
+
+            float neighborhood(float d) {
+                if (d > 5.) {
+                    return 0.;
+                }
+                return pow(max(sin(d - 1.), 0.), .2);
+            }
+
+            float cell(float d) {
+                if (d / rr > 5.) {
+                    return 0.;
+                }
+                return pow(max(cos(d / rr / 2.), 0.), .2);
+            }
 
             void main() {
                 vec2 center = vec2(ra / 2.);
                 float d = distance(center, gl_FragCoord.xy) / ra * 10.;
-                float c = sin(d - 1.);
-                c = max(c, 0.);
-                c = sqrt(c);
-                if (distance(center, gl_FragCoord.xy) > ra / 2.) {
-                    c = 0.;
-                }
-                gl_FragColor = vec4(vec3(c), 1.);
+                float red = neighborhood(d);
+                float green = cell(d);
+                float r = distance(center, gl_FragCoord.xy);
+                gl_FragColor = vec4(vec3(red, green, 0.), 1.);
             }
         `,
 
@@ -140,6 +154,7 @@ function initSimulation() {
 
         uniforms: {
             ra: kernelSize,
+            rr: () => state.rr,
         },
     });
         
@@ -172,8 +187,10 @@ function initSimulation() {
 
             dt: () => state.dt,
             ra: () => state.kernelSize,
+            rr: () => state.rr,
             center: () => state.center,
             stdDev: () => state.stddev,
+            nc: () => state.nc,
 
             color_conv: () => {
                 return [

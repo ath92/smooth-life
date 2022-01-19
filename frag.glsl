@@ -11,15 +11,17 @@ uniform float dt;
 uniform mat3 color_conv;
 uniform sampler2D kernelTexture;
 uniform float ra; // kernel size
+uniform float rr;
 uniform float center;
 uniform float stdDev;
+uniform float nc;
 
 vec3 _center =vec3(center);
 vec3 _stdDev = vec3(stdDev * stdDev);
 vec3 one = vec3(1);
 
-vec3 transition(vec3 a) {
-    vec3 l = a - _center;
+vec3 transition(vec3 a, vec3 c) {
+    vec3 l = a - c;
     return 2. * exp(-(l*l) / (2. * _stdDev)) - one;
 }
 
@@ -44,23 +46,28 @@ void main()
     const float maxRa = 24.;
     
     vec3 neighbourhood = vec3(0.);
+    vec3 cell = vec3(0.);
     for(float _dx=0.; _dx<=2.*maxRa; _dx++) {
         float dx = _dx - ra;
         for(float _dy=0.; _dy<=2.*maxRa; _dy++) {
             float dy = _dy - ra;
             vec2 txy = mod((gl_FragCoord.xy + vec2(dx,dy)) / resolution.xy, 1.);
             vec3 val = getBiasedVal(texture2D(readTexture, txy).xyz, redBias, greenBias, blueBias); 
-            float kernelValue = texture2D(kernelTexture, vec2(_dx + .5, _dy + .5) / (2.*ra)).x * 2. - 1.;
-            neighbourhood += val * kernelValue;
+            float kernelNeighbourhood = texture2D(kernelTexture, vec2(_dx + .5, _dy + .5) / (2.*ra)).x;
+            neighbourhood += kernelNeighbourhood * val;
+            float kernelCell = texture2D(kernelTexture, vec2(_dx + .5, _dy + .5) / (2.*ra)).y;
+            cell += kernelCell * val;
             if (dy >= 2. * ra) break;
         }
         if (dx >= 2. * ra) break;
     }
+    cell /= ra*ra/rr;
     neighbourhood /= ra*ra;
     
     vec3 prev = texture2D(readTexture, gl_FragCoord.xy / resolution.xy).xyz;
     // square dt to get a nicer UX out of the slider
-    vec3 trans = transition(neighbourhood);
+    vec3 cellTrans = transition(cell, _center);
+    vec3 trans = transition(neighbourhood, _center - cellTrans * nc);
     vec3 c = prev + dt * dt * (trans - prev);
     gl_FragColor = vec4(c,1);
 }
