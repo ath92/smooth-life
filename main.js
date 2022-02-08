@@ -11,15 +11,14 @@ window.addEventListener("mousemove", e => {
 })
 let isMouseDown = false;
 
-
 window.state = {
     dt: 0.441,
     outerRadius: 8,
     ratioOfRadii: 3,
     birth1: 0.257,
-    birth2: 0.336,
+    birth2: 0.479,
     survival1: 0.365,
-    survival2: 0.549,
+    survival2: 0.439,
     fullness1: 0.028,
     fullness2: 0.147,
 
