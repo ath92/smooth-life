@@ -5,133 +5,258 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <style>
             html, body {
-                margin: 0;
-                width: 100%;
-                height: 100%;
-                background: #000;
-                font-size: 16px;
-                font-family: sans-serif;
-            }
+          margin: 0;
+          width: 100%;
+          height: 100%;
+          background: #000;
+          font-size: 14px;
+          font-family: system-ui, 
+             -apple-system, BlinkMacSystemFont, 
+             "Segoe UI", 
+             "Roboto", 
+             "Oxygen", 
+             "Ubuntu", 
+             "Cantarell", 
+             "Fira Sans", 
+             "Droid Sans", 
+             "Helvetica Neue", 
+             Arial, sans-serif;
+      }
 
-            .controls {
-                position: fixed;
-                width: 20rem;
-                right: 1rem;
-                top: 0;
-                background-color: #333;
-                border-radius: 0 0 .25rem .25rem;
-                padding-top: .5rem;
-                z-index: 2;
-                transition: .4s ease-in-out;
-            }
+      .controls {
+          position: fixed;
+          width: 20rem;
+          right: 1rem;
+          top: 0;
+          background-color: #333;
+          border-radius: 0 0 .25rem .25rem;
+          padding-top: .5rem;
+          z-index: 2;
+          transition: .4s cubic-bezier(0.075, 0.82, 0.165, 1);
 
-            .controls label {
-                display: flex;
-                padding: .25rem .5rem;
-                align-items: center;
-            }
+          text-transform: lowercase;
+      }
 
-            .controls label span {
-                color: #fff;
-                font-size: .75rem;
-                flex-basis: 8rem;
-            }
+      .controls label {
+          display: flex;
+          padding: .25rem 1rem;
+          align-items: center;
 
-            .controls label input {
-                flex: 1;
-            }
+      }
 
-            .controls label button {
-                border: none;
-                background: #191919;
-                color: #fff;
-                border-radius: .25rem;
-                padding: .5rem;
-                margin-right: .5rem;
-            }
+      .controls label span {
+          color: #fff;
+          font-size: .75rem;
+          flex-basis: 6rem;
+      }
 
-            .controls h2 {
-                color: #fff;
-                font-size: 1rem;
-                margin: 0;
-                padding: .5rem;
-            }
+      .controls label input {
+          flex: 1;
+      }
 
-            .controls > button:last-child {
-                width: 100%;
-                color: #fff;
-                background: #222;
-                border: none;
-                padding: .25rem;
-            }
+      .controls label button {
+          border: none;
+          background: #191919;
+          color: #fff;
+          border-radius: .25rem;
+          padding: .5rem;
+          margin-right: .5rem;
+      }
+
+      .controls h2 {
+          color: #fff;
+          font-size: 1rem;
+          font-weight: 300;
+          margin: 0;
+          padding: 1.3rem 1rem .7rem 1rem;
+      }
+
+      .controls > button:last-child {
+          width: 100%;
+          color: #fff;
+          background: #222;
+          border: none;
+          padding: .25rem;
+          margin-top: 10px;
+      }
 
 
-            .controls > button:last-child:hover {
-                background: #444;
-                cursor: pointer;
-            }
+      .controls > button:last-child:hover {
+          background: #444;
+          cursor: pointer;
+      }
 
-            .controls.hidden > button:last-child {
-                transform: rotateX(180deg);
-            }
+      .controls.hidden > button:last-child {
+          transform: rotateX(180deg);
+      }
 
-            .controls.hidden {
-                transform: translateY(calc(-100% + 20px));
-            }
+      .controls.hidden {
+          transform: translateY(calc(-100% + 20px));
+      }
 
-            .collapsible > *:not(h2) {
-                transition: height .4s;
-                overflow: hidden;
-                box-sizing: border-box;
-            }
+      .collapsible > *:not(h2) {
+          transition: height .4s;
+          overflow: hidden;
+          box-sizing: border-box;
+      }
 
-            .collapsible.collapsed > *:not(h2){
-                height: 0;
-                padding: 0;/* hack*/
-            }
+      .collapsible.collapsed > *:not(h2){
+          height: 0;
+          padding: 0;/* hack*/
+      }
 
-            .collapsible h2 {
-                position: relative;
-                cursor: pointer;
-            }
+      .collapsible h2 {
+          position: relative;
+          cursor: pointer;
+      }
 
-            .collapsible h2::after{
-                display: block;
-                content: "⌃";
-                padding: .75rem;
-                color: #ccc;
-                position: absolute;
-                font-size: .75rem;
-                top: 0;
-                right: 0;
-            }
+      .collapsible h2::after{
+          display: block;
+          content: "⌃";
+          padding: .75rem;
+          color: #ccc;
+          position: absolute;
+          font-size: .75rem;
+          top: 0;
+          right: 0;
+          top: 20%;
+      }
 
-            .collapsible h2:hover::after {
-                color: #fff;
-            }
+      .collapsible h2:hover::after {
+          color: #fff;
+      }
 
-            @media only screen and (max-device-width: 800px) {
-                .collapsible.collapsed > *:not(h2){
-                    height: auto;
-                }
+      @media only screen and (max-device-width: 800px) {
+          .collapsible.collapsed > *:not(h2){
+              height: auto;
+          }
 
-                .controls label {
-                    padding: .25rem .5rem;
-                }
+          .controls label {
+              padding: .25rem .5rem;
+          }
 
-                .collapsible:not(.collapsed) > *:not(h2) {
-                    height: 0;
-                    padding: 0;
-                }
+          .collapsible:not(.collapsed) > *:not(h2) {
+              height: 0;
+              padding: 0;
+          }
 
-                .controls {
-                    transform: translateY(calc(-100% + 20px));
-                }
+          .controls {
+              transform: translateY(calc(-100% + 20px));
+          }
 
-                .controls.hidden {
-                    transform: translateY(0%);
-                }
-            }
+          .controls.hidden {
+              transform: translateY(0%);
+          }
+      }
+
+        .color {
+            display: block;
+            float: left;
+            width: 1em;
+            height: 1em;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .color + .color {
+            margin-left: .5em;
+        }
+
+        .color.red {
+        background: red;
+        }
+
+        .color.green {
+        background: #0f0;
+        }
+
+        .color.blue {
+        background: blue;
+        }
+
+
+        :root {
+            --slider-height: 10px;
+            --slider-thumb-width: 0px;
+            --slider-thumb-border-width: 0px;
+            --slider-track-bg: #222;
+            --slider-track-active-bg: #ccc;
+        }
+
+        input[type="range"] { 
+        margin: auto;
+        -webkit-appearance: none;
+        position: relative;
+        overflow: hidden;
+        height: var(--slider-height);
+        width: 200px;
+        cursor: pointer;
+        border-radius: 0; /* iOS */
+        }
+
+        ::-webkit-slider-runnable-track {
+        background: var(--slider-track-bg);
+        }
+
+        /*
+        * 1. Set to 0 width and remove border for a slider without a thumb
+        * 2. Shadow is negative the full width of the input and has a spread 
+        *    of the width of the input.
+        */
+        ::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: var(--slider-thumb-width); /* 1 */
+        height: var(--slider-height);
+        background: var(--slider-track-bg);
+        box-shadow: -200px 0 0 200px var(--slider-track-active-bg); /* 2 */
+        border: var(--slider-thumb-border-width) solid #999; /* 1 */
+        }
+
+        ::-moz-range-track {
+        height: var(--slider-height);
+        background: var(--slider-track-bg);
+        }
+
+        ::-moz-range-thumb {
+        background: #fff;
+        height: var(--slider-height);
+        width: var(--slider-thumb-width); /* 1 */
+        border: var(--slider-thumb-border-width) solid #999; /* 1 */
+        border-radius: 0 !important;
+        box-shadow: -200px 0 0 200px  var(--slider-track-active-bg);
+        box-sizing: border-box;
+        }
+
+        ::-ms-fill-lower { 
+        background:  var(--slider-track-active-bg);
+        }
+
+        ::-ms-thumb { 
+        background: #fff;
+        border: var(--slider-thumb-border-width) solid #999; /* 1 */
+        height: var(--slider-height);
+        width: var(--slider-thumb-width); /* 1 */
+        box-sizing: border-box;
+        }
+
+        ::-ms-ticks-after { 
+        display: none; 
+        }
+
+        ::-ms-ticks-before { 
+        display: none; 
+        }
+
+        ::-ms-track { 
+        background: var(--slider-track-bg);
+        color: transparent;
+        height: var(--slider-height);
+        border: none;
+        }
+
+        ::-ms-tooltip { 
+        display: none;
+        }
         </style>
     </head>
     <body>
@@ -189,47 +314,47 @@
                 <h2>Color interactions</h2>
 
                 <label>
-                    <span>Red -> Red</span>
+                    <span><div class="color red"></div>  <div class="color red"></div></span>
                     <input data-state="rr" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Red -> Green</span>
+                    <span><div class="color red"></div>  <div class="color green"></div></span>
                     <input data-state="rg" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Red -> Blue</span>
+                    <span><div class="color red"></div>  <div class="color blue"></div></span>
                     <input data-state="rb" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Green -> Red</span>
+                    <span><div class="color green"></div>  <div class="color red"></div></span>
                     <input data-state="gr" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Green -> Green</span>
+                    <span><div class="color green"></div>  <div class="color green"></div></span>
                     <input data-state="gg" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Green -> Blue</span>
+                    <span><div class="color green"></div>  <div class="color blue"></div></span>
                     <input data-state="gb" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Blue -> Red</span>
+                    <span><div class="color blue"></div>  <div class="color red"></div></span>
                     <input data-state="br" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Blue -> Green</span>
+                    <span><div class="color blue"></div>  <div class="color green"></div></span>
                     <input data-state="bg" type="range" min="-1" max="1" step="0.001" />
                 </label>
 
                 <label>
-                    <span>Blue -> Blue</span>
+                    <span><div class="color blue"></div>  <div class="color blue"></div></span>
                     <input data-state="bb" type="range" min="-1" max="1" step="0.001" />
                 </label>
             </section>
